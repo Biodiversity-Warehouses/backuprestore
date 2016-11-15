@@ -1,0 +1,12 @@
+---
+localhost:
+  remote: localhost2
+  time:
+    type: full
+#   type: subfolder
+#   shift: daily
+  modul:
+    directories:
+    - /etc
+    pgsql: host=localhost user=postgres
+
