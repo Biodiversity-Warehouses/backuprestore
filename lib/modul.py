@@ -2,13 +2,15 @@ import sys
 
 
 def _get_modul(modulname):
-    modul = None
     try:
         modules = __import__('modules.%s' % modulname)
         modul = getattr(modules, modulname)
+        getattr(modul, 'backup')
+        getattr(modul, 'restore')
+        return modul
     except:
         print("[%s] error finding module" % modulname, file=sys.stderr)
-    return modul
+    return None
 
 def run(config,direction,time=None):
     if 'remote' not in config:
