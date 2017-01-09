@@ -47,6 +47,7 @@ def backup():
 def restore():
     print(SPACER*"-")
     print("%sselect date to restore%s"%(COLOR_HEAD,COLOR_CLEAR))
+    print("full")
     lib.modul.restore(lib.config.CONFIG,prompt())
     main_menu()
     return

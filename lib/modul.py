@@ -18,6 +18,11 @@ def run(config,direction,time=None):
         return
     remote = config['remote']
 
+    if 'time' not in config:
+        print("error no time defined")
+        return
+    timemode = config['time']
+
     if 'modules' not in config:
         print("error no modules defined")
         return
@@ -31,9 +36,9 @@ def run(config,direction,time=None):
         if modul is not None:
             dirFunc = getattr(modul, direction)
             if time is not None:
-                dirFunc(remote,params,time)
+                dirFunc(remote,timemode,params,time)
             else:
-                dirFunc(remote,params)
+                dirFunc(remote,timemode,params)
         print("[%s] end backup" % key)
 
     print("end backup")

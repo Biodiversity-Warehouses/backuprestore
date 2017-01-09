@@ -1,5 +1,7 @@
 ---
-remote: localhost2
+remote:
+  host: firestore.firenet.sum7.eu
+  path: /tank/genofire/backup/test
 time:
   type: full
 modules:
