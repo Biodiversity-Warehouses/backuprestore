@@ -58,23 +58,27 @@ def backup(dest, timemode, params):
     path = _get_path(dest,timemode)
     _valid_folder(dest['host'],path)
     for src in params:
-        path_src = src
-        if path_src[0] == "/":
-            path_src = path_src[1:]
-        path_src = os.path.join(path,path_src)
-        remote_path = "%s:%s" % (dest['host'],path_src)
-        log("%s to %s" % (dest,remote_path))
-        sync(src,remote_path)
+        if src != "time":
+            path_src = src
+            if path_src[0] == "/":
+                path_src = path_src[1:]
+            path_src = os.path.join(path,path_src)
+            remote_path = "%s:%s" % (dest['host'],path_src)
+            log("%s to %s" % (dest,remote_path))
+            sync(src,remote_path)
 
 def restore(src,timemode, params,time):
     log("restore backup from %s" % time)
+    if 'time' in params:
+        timemode = params['time']
     path = _get_path(src,timemode)
     _valid_folder(src['host'],path)
     for dest in params:
-        path_dest = dest
-        if path_dest[0] == "/":
-            path_dest = path_dest[1:]
-        path_dest = os.path.join(path,path_dest)
-        remote_path = "%s:%s" % (src['host'],path_dest)
-        log("%s to %s" % (remote_path,dest))
-        sync(remote_path,dest)
+        if dest != "time":
+            path_dest = dest
+            if path_dest[0] == "/":
+                path_dest = path_dest[1:]
+            path_dest = os.path.join(path,path_dest)
+            remote_path = "%s:%s" % (src['host'],path_dest)
+            log("%s to %s" % (remote_path,dest))
+            sync(remote_path,dest)
