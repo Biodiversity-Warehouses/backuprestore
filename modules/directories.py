@@ -56,13 +56,13 @@ def backup(dest, timemode, params):
     if 'time' in params:
         timemode = params['time']
     path = _get_path(dest,timemode)
-    _valid_folder(dest['host'],path)
     for src in params:
         if src != "time":
             path_src = src
             if path_src[0] == "/":
                 path_src = path_src[1:]
             path_src = os.path.join(path,path_src)
+            _valid_folder(dest['host'],path_src)
             remote_path = "%s:%s" % (dest['host'],path_src)
             log("%s to %s" % (dest,remote_path))
             sync(src,remote_path)

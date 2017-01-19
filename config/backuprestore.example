@@ -6,6 +6,8 @@ time:
   type: full
 modules:
   directories:
-  - /etc
-  pgsql: host=localhost user=postgres
+  - /tmp/a
+  pgsqlreplica:
+    host: localhost
+    user: postgres
   notFoundDummy: nil
