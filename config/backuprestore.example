@@ -1,11 +1,11 @@
 ---
 remote:
-  host: firestore.firenet.sum7.eu
+  host: genofire@firestore.firenet.sum7.eu
   path: /tank/genofire/backup/test
 time:
   type: full
 modules:
-  directories:
+  directoriesOff:
   - /tmp/a
   pgsqlreplica:
     host: localhost

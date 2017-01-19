@@ -51,7 +51,6 @@ def backup(remote, timemode, params):
     _valid_folder(remote['host'],path)
     full_path = os.path.join(path,filename)
     log("%s to %s" % (remote['host'],full_path))
-    log(params)
     result = 1
     try:
         cmd = ["pg_basebackup"]
@@ -61,6 +60,7 @@ def backup(remote, timemode, params):
         if 'host' in params:
             cmd.append("-h")
             cmd.append(params['host'])
+        cmd.append("--xlog")
         cmd.append("-D")
         cmd.append("-")
         cmd.append("-Ft")
@@ -75,4 +75,41 @@ def backup(remote, timemode, params):
         log("error during backup to '%s'" % (full_path), file=sys.stderr)
 
 def restore(remote,timemode, params,time):
-    log("no restore of pgsqldump possible", file=sys.stderr)
+    log("restore backup from %s" % time)
+    cmd = ["psql"]
+    if 'user' in params:
+        cmd.append("-U")
+        cmd.append(params['user'])
+    if 'host' in params:
+        cmd.append("-h")
+        cmd.append(params['host'])
+    cmd.append("--tuples-only")
+    cmd.append("-P")
+    cmd.append("format=unaligned")
+    cmd.append("-c")
+    cmd.append("SHOW data_directory;")
+    data_path = subprocess.Popen(cmd, stdout=subprocess.PIPE).stdout.read().decode().replace("\n","")
+    if len(data_path) <= 1:
+        data_path = "/var/lib/postgres/data"
+
+    subprocess.run(["systemctl","stop","postgresql"])
+    log("stopped postgresql")
+    path,filename = _get_path(remote,timemode)
+    full_path = os.path.join(path,filename)
+    result = 1
+    log("cleanup '%s'" % data_path)
+    subprocess.run(["rm","-fR","%s/*" % data_path])
+    log("recieve backup to '%s'" % data_path)
+    try:
+        getdata = subprocess.Popen(["ssh", remote['host'], "cat %s" % full_path], stdout = subprocess.PIPE)
+        extract = subprocess.Popen(['tar', 'xz','-C',data_path],  stdin = getdata.stdout, stdout = subprocess.PIPE)
+        extract.wait(200)
+        result = extract.returncode
+        subprocess.run(["chmod","-R","go-rx",data_path])
+        subprocess.run(["chown","-R","postgres:postgres",data_path])
+    except subprocess.TimeoutExpired:
+        log("timeout during restore to '%s'" % (full_path), file=sys.stderr)
+    if result != 0:
+        log("error during restore to '%s'" % (full_path), file=sys.stderr)
+    log("start postgresql")
+    subprocess.run(["systemctl","start","postgresql"])
