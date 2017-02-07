@@ -32,7 +32,8 @@ def _valid_folder(host,path):
     cmd = ["ssh", host, "mkdir -p %s" % path]
     result = 1
     try:
-        cmdrun = subprocess.run(args=cmd,timeout=10)
+        cmdrun = subprocess.Popen(cmd)
+        cmdrun.wait(10)
         result = cmdrun.returncode
     except subprocess.TimeoutExpired:
         log("timeout create folder on '%s' at '%s'" % (host,path), file=sys.stderr)
@@ -91,25 +92,38 @@ def restore(remote,timemode, params,time):
     data_path = subprocess.Popen(cmd, stdout=subprocess.PIPE).stdout.read().decode().replace("\n","")
     if len(data_path) <= 1:
         data_path = "/var/lib/postgres/data"
-
-    subprocess.run(["systemctl","stop","postgresql"])
+    try:
+        subprocess.Popen(["systemctl","stop","postgresql"])
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            subprocess.Popen(["/etc/init.d/postgresql","stop"])
+        else:
+            log("error during stoping postgresql", file=sys.stderr)
+            return false
     log("stopped postgresql")
     path,filename = _get_path(remote,timemode)
     full_path = os.path.join(path,filename)
     result = 1
     log("cleanup '%s'" % data_path)
-    subprocess.run(["rm","-fR","%s/*" % data_path])
+    subprocess.Popen(["rm","-fR","%s/*" % data_path])
     log("recieve backup to '%s'" % data_path)
     try:
         getdata = subprocess.Popen(["ssh", remote['host'], "cat %s" % full_path], stdout = subprocess.PIPE)
         extract = subprocess.Popen(['tar', 'xz','-C',data_path],  stdin = getdata.stdout, stdout = subprocess.PIPE)
         extract.wait(200)
         result = extract.returncode
-        subprocess.run(["chmod","-R","go-rx",data_path])
-        subprocess.run(["chown","-R","postgres:postgres",data_path])
+        subprocess.Popen(["chmod","-R","go-rx",data_path])
+        subprocess.Popen(["chown","-R","postgres:postgres",data_path])
     except subprocess.TimeoutExpired:
         log("timeout during restore to '%s'" % (full_path), file=sys.stderr)
     if result != 0:
         log("error during restore to '%s'" % (full_path), file=sys.stderr)
     log("start postgresql")
-    subprocess.run(["systemctl","start","postgresql"])
+    try:
+        subprocess.Popen(["systemctl","start","postgresql"])
+    except OSError as e:
+        if e.errno == os.errno.ENOENT:
+            subprocess.Popen(["/etc/init.d/postgresql","start"])
+        else:
+            log("error during stoping postgresql", file=sys.stderr)
+            return false

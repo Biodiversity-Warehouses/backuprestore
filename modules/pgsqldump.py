@@ -26,7 +26,8 @@ def _valid_folder(host,path):
     cmd = ["ssh", host, "mkdir -p %s" % path]
     result = 1
     try:
-        cmdrun = subprocess.run(args=cmd,timeout=10)
+        cmdrun = subprocess.Popen(cmd)
+        cmdrun.wait(10)
         result = cmdrun.returncode
     except subprocess.TimeoutExpired:
         log("timeout create folder on '%s' at '%s'" % (host,path), file=sys.stderr)
