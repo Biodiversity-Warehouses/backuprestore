@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import sys
 import getopt
@@ -69,7 +69,7 @@ menu_actions = {
 
 # Main Program
 if __name__ == "__main__":
-    config_path = 'config/backuprestore.example'
+    config_path = None
     try:
         opts, args = getopt.getopt(sys.argv[1:],"hc",["config="])
         for opt, arg in opts:
@@ -80,7 +80,10 @@ if __name__ == "__main__":
                 config_path = arg
     except getopt.GetoptError:
         print("Error with input\nbr-console -c <configfile>")
+    if config_path is None:
+        config_path = lib.config.check_possible_path()
+    print("%sWelcome,%s"%(COLOR_HEAD,COLOR_CLEAR))
+    print("load config from: %s\n" % config_path)
     lib.config.init(config_path)
-    print("%sWelcome,%s\n"%(COLOR_HEAD,COLOR_CLEAR))
     # Launch main menu
     main_menu()

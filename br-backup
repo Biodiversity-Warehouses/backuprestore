@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import getopt
@@ -6,7 +6,7 @@ import lib.config
 import lib.modul
 
 if __name__ == "__main__":
-    config_path = 'config/backuprestore.example'
+    config_path = None
     try:
         opts, args = getopt.getopt(sys.argv[1:],"hc",["config="])
         for opt, arg in opts:
@@ -17,5 +17,8 @@ if __name__ == "__main__":
                 config_path = arg
     except getopt.GetoptError:
         print("Error with input\nbr-service -c <configfile>")
+    if config_path is None:
+        config_path = lib.config.check_possible_path()
+    print("load config from: %s" % config_path)
     lib.config.init(config_path)
     lib.modul.backup(lib.config.CONFIG)
