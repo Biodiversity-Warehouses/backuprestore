@@ -33,7 +33,7 @@ def _valid_folder(host,path):
     result = 1
     try:
         cmdrun = subprocess.Popen(cmd)
-        cmdrun.wait(10)
+        cmdrun.wait(300)
         result = cmdrun.returncode
     except subprocess.TimeoutExpired:
         log("timeout create folder on '%s' at '%s'" % (host,path), file=sys.stderr)
@@ -68,7 +68,7 @@ def backup(remote, timemode, params):
         getdata = subprocess.Popen(cmd,stdout = subprocess.PIPE)
         compress = subprocess.Popen(['gzip', '-9'],  stdin = getdata.stdout, stdout = subprocess.PIPE)
         cmdrun = subprocess.Popen(["ssh", remote['host'], "cat > %s" % full_path], stdin = compress.stdout, stdout = subprocess.PIPE)
-        cmdrun.wait(200)
+        cmdrun.wait(1800)
         result = cmdrun.returncode
     except subprocess.TimeoutExpired:
         log("timeout during backup to '%s'" % (full_path), file=sys.stderr)
@@ -110,7 +110,7 @@ def restore(remote,timemode, params,time):
     try:
         getdata = subprocess.Popen(["ssh", remote['host'], "cat %s" % full_path], stdout = subprocess.PIPE)
         extract = subprocess.Popen(['tar', 'xz','-C',data_path],  stdin = getdata.stdout, stdout = subprocess.PIPE)
-        extract.wait(200)
+        extract.wait(1800)
         result = extract.returncode
         subprocess.Popen(["chmod","-R","go-rx",data_path])
         subprocess.Popen(["chown","-R","postgres:postgres",data_path])

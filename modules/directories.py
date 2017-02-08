@@ -27,7 +27,7 @@ def _valid_folder(host,path):
     result = 1
     try:
         cmdrun = subprocess.Popen(cmd)
-        cmdrun.wait(10)
+        cmdrun.wait(300)
         result = cmdrun.returncode
     except subprocess.TimeoutExpired:
         log("timeout create folder on '%s' at '%s'" % (host,path), file=sys.stderr)
@@ -42,7 +42,7 @@ def sync(src,dest):
     result = 1
     try:
         cmdrun = subprocess.Popen(cmd)
-        cmdrun.wait(200)
+        cmdrun.wait(1800)
         result = cmdrun.returncode
     except subprocess.TimeoutExpired:
         log("timeout during sync '%s' to '%s'" % (src,dest), file=sys.stderr)
